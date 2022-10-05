@@ -2,7 +2,10 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  "appId": "YourAppID",
+  "appId": "scrcpy_electron_48100247@qq.com",
+  "electronDownload": {
+    "mirror": "https://mirrors.huaweicloud.com/electron/"
+  },
   "asar": true,
   "directories": {
     "output": "release/${version}"
@@ -11,6 +14,10 @@
     "dist-electron",
     "dist"
   ],
+  "extraResources": {
+    "from": "./electron/library/",
+    "to": "library"
+  },
   "mac": {
     "artifactName": "${productName}_${version}.${ext}",
     "target": [
