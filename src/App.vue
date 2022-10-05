@@ -56,7 +56,7 @@ const setRemark = (record: any) => {
   record.remark_modify = false
 }
 
-ipcRenderer.on('disconnect', (e, data) => {
+ipcRenderer.on('disconnect', (e: any, data: any) => {
   console.log('断开连接', data)
   deviceStatus.value[data.host] = false
   AMessage.error(`${data.host} 断开连接`)

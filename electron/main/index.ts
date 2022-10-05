@@ -8,14 +8,12 @@
 // ├─┬ dist
 // │ └── index.html    > Electron-Renderer
 //
-process.env.DIST_ELECTRON = join(__dirname, '..')
-process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
-process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST_ELECTRON, '../public')
 
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
 import cp from 'child_process'
+import { scrcpyDir } from './config'
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -115,7 +113,7 @@ ipcMain.handle('open-win', (event, arg) => {
 
 
 ipcMain.handle('devices', () => {
-  const stdout = cp.execSync('adb devices')
+  const stdout = cp.execSync(`${scrcpyDir}\\adb.exe devices`)
   const output = stdout.toString()
   console.log(JSON.stringify(output))
   const devices: { host: string, name: string }[] = [];
@@ -127,9 +125,9 @@ ipcMain.handle('devices', () => {
   return devices
 })
 
-ipcMain.handle('scrcpy', (e, data) => {
+ipcMain.handle('scrcpy', (e: any, data: any) => {
   console.log(data)
-  cp.exec(`scrcpy -s ${data.host} --stay-awake --window-title ${data.title}`, (error, stdout, stderr) => {
+  cp.exec(`${scrcpyDir}\\scrcpy.exe -s ${data.host} --stay-awake --window-title ${data.title}`, (error, stdout, stderr) => {
     // 被关闭了
     e.sender.send('disconnect', { host: data.host })
   })
