@@ -13,10 +13,11 @@ const getDevices = async () => {
     for (const device of devices.value) {
         // remark
         device.remark = localStorage.getItem(`REMARK:${device.host}`)
+        if (device.ws) device.ws.close()
     }
     nextTick(() => {
         renderAllDisplay()
-    })
+    });
 }
 
 const deviceStatus = ref({} as any)
@@ -44,8 +45,10 @@ ipcRenderer.on('disconnect', (e: any, data: any) => {
 })
 
 const renderDisplay = (device: any) => {
-    const jmuxer = new JMuxer({
-        node: `player_${device.host}`,
+    device.signal_connecting = true
+    device.video = document.getElementById(`player_${device.host}`)
+    device.jmuxer = new JMuxer({
+        node: device.video,
         mode: 'video',
         debug: false,
     });
@@ -56,16 +59,28 @@ const renderDisplay = (device: any) => {
     ws.onopen = () => {
         ws.send(device.host)
         device.display = true;
+        device.ws = ws;
+        setTimeout(() => {
+            device.signal_connecting = false
+        }, 3000);
     }
 
     ws.onmessage = ({ data }) => {
         try {
-            jmuxer.feed({
+            device.jmuxer.feed({
                 video: new Uint8Array(data),
             });
         } catch (error) {
             console.error(error)
         }
+    }
+
+    ws.onclose = () => {
+        device.jmuxer.destroy()
+        device.jmuxer = null
+        device.video.src = ''
+        device.display = false
+        device.signal_connecting = false
     }
 }
 
@@ -86,6 +101,14 @@ const wirelessConnect = async () => {
     const { message } = await ipcRenderer.invoke('adb-connect', { host: address.value })
     AMessage.info(message)
     getDevices()
+}
+
+const switchDisplay = (record: any) => {
+    if (record.ws) record.ws.close()
+    if (!record.display) {
+        // 开启
+        renderDisplay(record)
+    }
 }
 
 </script>
@@ -111,6 +134,8 @@ const wirelessConnect = async () => {
         <div style="display: grid; grid-template-columns: 22.5vw 22.5vw 22.5vw 22.5vw">
             <a-card v-for="record in devices" style="width: 20vmax; margin: 10px">
                 <video :id="`player_${record.host}`" autoplay style="width: 100%"></video>
+                <a-empty v-if="record.signal_connecting" description="信号连接中"></a-empty>
+                <a-empty v-if="!record.display" description="信号断开"></a-empty>
                 <div style="margin: 15px auto; text-align: center">{{ record.host }}</div>
                 <a-form>
                     <a-form-item label="备注">
@@ -120,6 +145,10 @@ const wirelessConnect = async () => {
                             <a-button type="primary" @click="setRemark(record)" :disabled="!record.remark_modify">保存
                             </a-button>
                         </a-input-group>
+                    </a-form-item>
+                    <a-form-item label="预览">
+                        <a-button size="mini" @click="switchDisplay(record)">{{
+                        record.display ? '断开' : '连接' }}</a-button>
                     </a-form-item>
                     <a-form-item label="控制">
                         <a-button type="primary" size="mini" @click="connect(record)"

@@ -1,18 +1,25 @@
-# scrcpy使用指南
+> Mac下需要自行安装ADB以及Scrcpy
 
-```shell
-# 指定窗口大小以及位置
-scrcpy --window-x 100 --window-y 100 --window-width 800 --window-height 600
-
-# 隐藏边框
---window-borderless
-
-# 窗口置顶
---always-on-top
-
-# 防止睡眠（插入电源有效）
---stay-awake
-
-# 显示触摸点
---show-touches
 ```
+brew install scrcpy
+
+brew install android-platform-tools
+```
+
+> Windows请切换到win-x64分支
+
+# 开发
+
+```
+yarn
+
+yarn dev
+```
+
+# 构建
+
+```
+yarn build
+```
+
+# 软件截图
