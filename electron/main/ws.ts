@@ -4,7 +4,7 @@ import { Socket } from 'net';
 
 import { scrcpyDir } from './config'
 const adb = `${scrcpyDir}\\adb.exe`
-const scrcpyServer = `${scrcpyDir}\\scrcpy-server.exe`
+const scrcpyServer = `${scrcpyDir}\\scrcpy-server`
 
 const freePorts = [];
 const getFreePort = async () => {
