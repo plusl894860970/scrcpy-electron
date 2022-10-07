@@ -2,6 +2,9 @@ import WebSocket from 'ws'
 import cp from 'child_process'
 import { Socket } from 'net';
 
+import { scrcpyDir } from './config'
+const adb = `${scrcpyDir}\\adb.exe`
+
 const freePorts = [];
 const getFreePort = async () => {
     if (!freePorts.length) {
@@ -16,25 +19,25 @@ const connectScrcpyServer = async (device, ws) => {
     const port = await getFreePort();
     const videoSocket = new Socket()
     // 发送文件到设备
-    cp.exec(`adb -s ${device} push ./scrcpy-server-v1.24 /data/local/tmp/scrcpy-server.jar`, (error, stdout, stderr) => {
+    cp.exec(`${adb} -s ${device} push ./scrcpy-server-v1.24 /data/local/tmp/scrcpy-server.jar`, (error, stdout, stderr) => {
         console.log(stdout)
         // adb反向代理
-        cp.exec(`adb -s ${device} forward tcp:${port} localabstract:scrcpy`, (error2, stderr2, stdout2) => {
-            console.log(`adb -s ${device} forward`)
+        cp.exec(`${adb} -s ${device} forward tcp:${port} localabstract:scrcpy`, (error2, stderr2, stdout2) => {
+            console.log(`${adb} -s ${device} forward`)
             // 使用app_process运行scrcpy-server.jar
             // raw_video_stream=true 原生h264流
-            cp.exec(`adb -s ${device} shell CLASSPATH=/data/local/tmp/scrcpy-server.jar \
+            cp.exec(`${adb} -s ${device} shell CLASSPATH=/data/local/tmp/scrcpy-server.jar \
                     app_process / com.genymobile.scrcpy.Server 1.24 \
                     raw_video_stream=true tunnel_forward=true control=false`, (error3, stderr3, stdout3) => {
                 console.log('scrcpy-server stop', port)
                 freePorts.push(port)
             })
-            const device_info = {
-                displaysCount: 0,
-                name: '',
-                width: 1080,
-                height: 1920,
-            }
+            // const device_info = {
+            //     displaysCount: 0,
+            //     name: '',
+            //     width: 1080,
+            //     height: 1920,
+            // }
             setTimeout(() => {
                 // socket连接
                 let connected = false;

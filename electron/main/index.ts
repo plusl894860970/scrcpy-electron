@@ -140,5 +140,5 @@ ipcMain.handle('scrcpy', (e: any, data: any) => {
 
 ipcMain.handle('adb-connect', (e, data) => {
   console.log(data)
-  return { success: true, message: cp.execSync(`adb connect ${data.host}`).toString() }
+  return { success: true, message: cp.execSync(`${scrcpyDir}\\adb.exe connect ${data.host}`).toString() }
 })
