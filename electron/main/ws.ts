@@ -4,6 +4,7 @@ import { Socket } from 'net';
 
 import { scrcpyDir } from './config'
 const adb = `${scrcpyDir}\\adb.exe`
+const scrcpyServer = `${scrcpyDir}\\scrcpy-server.exe`
 
 const freePorts = [];
 const getFreePort = async () => {
@@ -19,7 +20,7 @@ const connectScrcpyServer = async (device, ws) => {
     const port = await getFreePort();
     const videoSocket = new Socket()
     // 发送文件到设备
-    cp.exec(`${adb} -s ${device} push ./scrcpy-server-v1.24 /data/local/tmp/scrcpy-server.jar`, (error, stdout, stderr) => {
+    cp.exec(`${adb} -s ${device} push ${scrcpyServer} /data/local/tmp/scrcpy-server.jar`, (error, stdout, stderr) => {
         console.log(stdout)
         // adb反向代理
         cp.exec(`${adb} -s ${device} forward tcp:${port} localabstract:scrcpy`, (error2, stderr2, stdout2) => {
