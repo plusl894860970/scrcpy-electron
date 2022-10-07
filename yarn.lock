@@ -176,6 +176,13 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/jmuxer@^2.0.3":
+  version "2.0.3"
+  resolved "https://mirrors.huaweicloud.com/repository/npm/@types/jmuxer/-/jmuxer-2.0.3.tgz#390b9eab38f9e9a43244fcf2620e2ed532a621a8"
+  integrity sha512-jRwZXuPbNRG8wTfJT7gjpZm72EaMzvN3oG7zbFWdW8+OHJmxAhLyqycTd/0GtZ/P8OjKXa1cbyKxQg6coXlERg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/minimatch@*":
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-5.1.2.tgz#07508b45797cb81ec3f273011b054cd0755eddca"
@@ -228,10 +235,10 @@
   dependencies:
     "@types/node" "*"
 
-"@vitejs/plugin-vue@3.0.1":
-  version "3.0.1"
-  resolved "https://mirrors.huaweicloud.com/repository/npm/@vitejs/plugin-vue/-/plugin-vue-3.0.1.tgz#b6af8f782485374bbb5fe09edf067a845bf4caae"
-  integrity sha512-Ll9JgxG7ONIz/XZv3dssfoMUDu9qAnlJ+km+pBA0teYSXzwPCIzS/e1bmwNYl5dcQGs677D21amgfYAnzMl17A==
+"@vitejs/plugin-vue@^3.0.1":
+  version "3.1.2"
+  resolved "https://mirrors.huaweicloud.com/repository/npm/@vitejs/plugin-vue/-/plugin-vue-3.1.2.tgz#3cd52114e8871a0b5e7bd7d837469c032e503036"
+  integrity sha512-3zxKNlvA3oNaKDYX0NBclgxTQ1xaFdL7PzwF6zj9tGFziKwmBa3Q/6XcJQxudlT81WxDjEhHmevvIC4Orc1LhQ==
 
 "@volar/code-gen@0.40.13":
   version "0.40.13"
@@ -317,6 +324,11 @@
   dependencies:
     "@vue/compiler-dom" "3.2.40"
     "@vue/shared" "3.2.40"
+
+"@vue/devtools-api@^6.1.4":
+  version "6.4.3"
+  resolved "https://mirrors.huaweicloud.com/repository/npm/@vue/devtools-api/-/devtools-api-6.4.3.tgz#784aa9e397adde727ca892c3574f5f1cfb2bc1c2"
+  integrity sha512-9WCRwdROJvWcHAdyrR7SZMM/qUvllDZnpndHXokThkUsjnJ2xe4/pvsH9FZrxFe22L+JmDKczL79HjLJ7DK9rg==
 
 "@vue/reactivity-transform@3.2.40":
   version "3.2.40"
@@ -1699,6 +1711,11 @@ jake@^10.8.5:
     filelist "^1.0.1"
     minimatch "^3.0.4"
 
+jmuxer@^2.0.5:
+  version "2.0.5"
+  resolved "https://mirrors.huaweicloud.com/repository/npm/jmuxer/-/jmuxer-2.0.5.tgz#36328afb8412fd13e37725d410e3c39c00cb9a33"
+  integrity sha512-4qjXl8JS138WyCZZoOYwXq/qVrHcE0UIpt2lMtGyq2wuBSPMNSzP1K2CEWSrwAMgjZ9jD7Btc0SxMkiLIhoHsg==
+
 "js-tokens@^3.0.0 || ^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -2504,6 +2521,13 @@ vite@^3.0.8:
   optionalDependencies:
     fsevents "~2.3.2"
 
+vue-router@4:
+  version "4.1.5"
+  resolved "https://mirrors.huaweicloud.com/repository/npm/vue-router/-/vue-router-4.1.5.tgz#256f597e3f5a281a23352a6193aa6e342c8d9f9a"
+  integrity sha512-IsvoF5D2GQ/EGTs/Th4NQms9gd2NSqV+yylxIyp/OYp8xOwxmU8Kj/74E9DTSYAyH5LX7idVUngN3JSj1X4xcQ==
+  dependencies:
+    "@vue/devtools-api" "^6.1.4"
+
 vue-tsc@^0.40.1:
   version "0.40.13"
   resolved "https://registry.yarnpkg.com/vue-tsc/-/vue-tsc-0.40.13.tgz#0a193014f7cadb47459cf0809ce3953b74a1348c"
@@ -2574,6 +2598,11 @@ write-file-atomic@^3.0.0:
     is-typedarray "^1.0.0"
     signal-exit "^3.0.2"
     typedarray-to-buffer "^3.1.5"
+
+ws@^8.9.0:
+  version "8.9.0"
+  resolved "https://mirrors.huaweicloud.com/repository/npm/ws/-/ws-8.9.0.tgz#2a994bb67144be1b53fe2d23c53c028adeb7f45e"
+  integrity sha512-Ja7nszREasGaYUYCI2k4lCKIRTt+y7XuqVoHR44YpI49TtryyqbqvDMn5eqfW7e6HzTukDRIsXqzVHScqRcafg==
 
 xdg-basedir@^4.0.0:
   version "4.0.0"
