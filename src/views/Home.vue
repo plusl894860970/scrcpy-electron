@@ -80,12 +80,25 @@ onMounted(async () => {
     await getDevices()
 })
 
+const address = ref('192.168.31.227')
+const wirelessConnect = async () => {
+    console.log(address.value)
+    const { message } = await ipcRenderer.invoke('adb-connect', { host: address.value })
+    AMessage.info(message)
+    getDevices()
+}
+
 </script>
     
 <template>
     <div>
         <a-card title="设备">
             <template #extra><a @click="getDevices">刷新</a></template>
+            <a-input-group compact style="margin-bottom: 15px">
+                <a-input v-model:value="address" style="width: calc(30% - 100px)" />
+                <a-button type="primary" @click="wirelessConnect">ADB连接
+                </a-button>
+            </a-input-group>
             <a-alert show-icon message="操作说明" type="info" style="margin-bottom: 15px">
                 <template #description>
                     <div>
@@ -96,12 +109,10 @@ onMounted(async () => {
             </a-alert>
         </a-card>
         <div style="display: grid; grid-template-columns: 22.5vw 22.5vw 22.5vw 22.5vw">
-            <a-card v-for="record in devices" style="width: 20vmax; height: 35vmax; margin: 10px">
+            <a-card v-for="record in devices" style="width: 20vmax; margin: 10px">
                 <video :id="`player_${record.host}`" autoplay style="width: 100%"></video>
+                <div style="margin: 15px auto; text-align: center">{{ record.host }}</div>
                 <a-form>
-                    <a-form-item label="HOST">
-                        {{ record.host }}
-                    </a-form-item>
                     <a-form-item label="备注">
                         <a-input-group compact>
                             <a-input v-model:value="record.remark" style="width: calc(100% - 100px)"

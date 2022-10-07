@@ -137,3 +137,8 @@ ipcMain.handle('scrcpy', (e: any, data: any) => {
   })
   return { success: true, message: '启动成功' }
 })
+
+ipcMain.handle('adb-connect', (e, data) => {
+  console.log(data)
+  return { success: true, message: cp.execSync(`adb connect ${data.host}`).toString() }
+})
