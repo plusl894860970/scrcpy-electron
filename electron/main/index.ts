@@ -141,3 +141,16 @@ ipcMain.handle('adb-connect', (e, data) => {
   console.log(data)
   return { success: true, message: cp.execSync(`adb connect ${data.host}`).toString() }
 })
+
+ipcMain.handle('adb-install', (e, data) => {
+  console.log(data)
+  const { apk, hosts } = data;
+  for (const host of hosts) {
+    win.webContents.send('install-msg', { host, msg: '开始安装' })
+    cp.exec(`adb -s ${host} install ${apk}`, (err, stdout, stderr) => {
+      console.log('adb install', stdout, stderr)
+      win.webContents.send('install-msg', { host, msg: stdout.toString() })
+    })
+  }
+  return { success: true, message: '已发送指令' }
+})
