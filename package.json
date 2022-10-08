@@ -1,6 +1,6 @@
 {
   "name": "scrcpy-electron",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist-electron/main/index.js",
   "description": "Scrcpy GUI.",
   "author": "HappyPlus <48100247@qq.com>",

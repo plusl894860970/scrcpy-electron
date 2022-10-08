@@ -1,15 +1,23 @@
 <script setup lang="ts">
 
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, reactive, watch } from 'vue'
 import { message as AMessage } from 'ant-design-vue'
 import JMuxer from 'jmuxer'
 
 const { ipcRenderer } = require('electron')
 
+const state = reactive({
+    plainOptions: [] as any,
+    indeterminate: true,
+    checkAll: false,
+    checkedList: [],
+});
+
 const devices = ref([] as any[])
 const getDevices = async () => {
     const res = await ipcRenderer.invoke('devices')
     devices.value = res
+    state.plainOptions = devices.value.map(o => o.host)
     for (const device of devices.value) {
         // remark
         device.remark = localStorage.getItem(`REMARK:${device.host}`)
@@ -111,17 +119,71 @@ const switchDisplay = (record: any) => {
     }
 }
 
+const isShowSelect = ref(false)
+
+const onCheckAllChange = (e: any) => {
+    Object.assign(state, {
+        checkedList: e.target.checked ? devices.value.map(o => o.host) : [],
+        indeterminate: false,
+    });
+};
+
+watch(
+    () => state.checkedList,
+    val => {
+        state.indeterminate = !!val.length && val.length < state.plainOptions.length;
+        state.checkAll = val.length === state.plainOptions.length;
+    },
+);
+
+const successCount = ref(0)
+const installLoading = ref(false)
+const confirmInstall = async () => {
+    successCount.value = 0
+    installLoading.value = true;
+    setTimeout(() => {
+        if (installLoading.value) installLoading.value = false;
+    }, 2 * 60 * 1000)
+    const res = await ipcRenderer.invoke('adb-install', { apk: apk.value, hosts: JSON.parse(JSON.stringify(state.checkedList)) })
+}
+
+const fileList = ref([] as any)
+const apk = ref('')
+const handleChange = (e: any) => {
+    if (fileList.value.length > 1) fileList.value = fileList.value.slice(1)
+    apk.value = e.file.path
+}
+
+const installMsg = ref([] as any)
+ipcRenderer.on('install-msg', (e: any, data: any) => {
+    console.log(data.msg)
+    if (data.msg.includes('Success')) successCount.value++
+    if (successCount.value >= state.plainOptions.length) {
+        installLoading.value = false
+        fileList.value = []
+    }
+    installMsg.value.push(data);
+})
+
 </script>
     
 <template>
     <div>
         <a-card title="设备">
             <template #extra><a @click="getDevices">刷新</a></template>
-            <a-input-group compact style="margin-bottom: 15px">
-                <a-input v-model:value="address" style="width: calc(30% - 100px)" />
-                <a-button type="primary" @click="wirelessConnect">ADB连接
-                </a-button>
-            </a-input-group>
+            <a-row>
+                <a-col :span="5">
+                    <a-input-group compact style="margin-bottom: 15px">
+                        <a-input v-model:value="address" style="width: calc(100% - 100px)" />
+                        <a-button type="primary" @click="wirelessConnect">ADB连接
+                        </a-button>
+                    </a-input-group>
+                </a-col>
+                <a-col :span="19">
+                    <a-button type="primary" @click="isShowSelect = true">批量安装APK
+                    </a-button>
+                </a-col>
+            </a-row>
             <a-alert show-icon message="操作说明" type="info" style="margin-bottom: 15px">
                 <template #description>
                     <div>
@@ -158,6 +220,32 @@ const switchDisplay = (record: any) => {
                 </a-form>
             </a-card>
         </div>
+        <a-modal v-model:visible="isShowSelect" title="设备列表" :footer="false">
+            <div>
+                <a-upload-dragger accept=".apk" v-model:fileList="fileList" name="file" action="#"
+                    :customRequest="handleChange">
+                    <p class="ant-upload-text">点击或者拖拽文件到此处</p>
+                    <p class="ant-upload-hint">
+                        仅支持APK文件
+                    </p>
+                </a-upload-dragger>
+            </div>
+            <a-divider />
+            <div>
+                <a-checkbox v-model:checked="state.checkAll" :indeterminate="state.indeterminate"
+                    @change="onCheckAllChange">
+                    全部
+                </a-checkbox>
+            </div>
+            <a-divider />
+            <a-checkbox-group v-model:value="state.checkedList" :options="state.plainOptions" />
+            <div style="margin-top: 35px">
+                <a-button type="primary" @click="confirmInstall" :loading="installLoading"
+                    :disabled="!state.checkedList.length || !apk">安装</a-button>
+            </div>
+            <a-divider />
+            <div v-for="item in installMsg">{{ item.host }}: {{ item.msg }}</div>
+        </a-modal>
     </div>
 </template>
     
