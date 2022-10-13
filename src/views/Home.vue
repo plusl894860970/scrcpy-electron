@@ -103,7 +103,7 @@ onMounted(async () => {
     await getDevices()
 })
 
-const address = ref('192.168.31.227')
+const address = ref('192.168.31.224')
 const wirelessConnect = async () => {
     console.log(address.value)
     const { message } = await ipcRenderer.invoke('adb-connect', { host: address.value })
@@ -138,13 +138,14 @@ watch(
 
 const successCount = ref(0)
 const installLoading = ref(false)
+const targetDir = ref('/sdcard/脚本/')
 const confirmInstall = async () => {
     successCount.value = 0
     installLoading.value = true;
     setTimeout(() => {
         if (installLoading.value) installLoading.value = false;
     }, 2 * 60 * 1000)
-    const res = await ipcRenderer.invoke('adb-install', { apk: apk.value, hosts: JSON.parse(JSON.stringify(state.checkedList)) })
+    const res = await ipcRenderer.invoke('adb-install', { apk: apk.value, hosts: JSON.parse(JSON.stringify(state.checkedList)), targetDir: targetDir.value })
 }
 
 const fileList = ref([] as any)
@@ -157,7 +158,7 @@ const handleChange = (e: any) => {
 const installMsg = ref([] as any)
 ipcRenderer.on('install-msg', (e: any, data: any) => {
     console.log(data.msg)
-    if (data.msg.includes('Success')) successCount.value++
+    if (data.msg.includes('Success') || data.msg.includes('pushed')) successCount.value++
     if (successCount.value >= state.plainOptions.length) {
         installLoading.value = false
         fileList.value = []
@@ -180,7 +181,7 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
                     </a-input-group>
                 </a-col>
                 <a-col :span="19">
-                    <a-button type="primary" @click="isShowSelect = true">批量安装APK
+                    <a-button type="primary" @click="isShowSelect = true">批量安装/推送
                     </a-button>
                 </a-col>
             </a-row>
@@ -222,11 +223,11 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
         </div>
         <a-modal v-model:visible="isShowSelect" title="设备列表" :footer="false">
             <div>
-                <a-upload-dragger accept=".apk" v-model:fileList="fileList" name="file" action="#"
+                <a-upload-dragger v-model:fileList="fileList" name="file" action="#"
                     :customRequest="handleChange">
                     <p class="ant-upload-text">点击或者拖拽文件到此处</p>
                     <p class="ant-upload-hint">
-                        仅支持APK文件
+                        APK文件会安装、其他会推送到设备上
                     </p>
                 </a-upload-dragger>
             </div>
@@ -239,9 +240,10 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
             </div>
             <a-divider />
             <a-checkbox-group v-model:value="state.checkedList" :options="state.plainOptions" />
-            <div style="margin-top: 35px">
+            <div style="margin-top: 35px" v-if="fileList[0]">
+                <div style="margin-bottom: 15px" v-if="!fileList[0].name.endsWith('.apk')">推送路径：<a-input v-model:value="targetDir" /></div>
                 <a-button type="primary" @click="confirmInstall" :loading="installLoading"
-                    :disabled="!state.checkedList.length || !apk">安装</a-button>
+                    :disabled="!state.checkedList.length || !apk">{{ fileList[0].name.endsWith('.apk') ? '安装' : '推送' }}</a-button>
             </div>
             <a-divider />
             <div v-for="item in installMsg">{{ item.host }}: {{ item.msg }}</div>
