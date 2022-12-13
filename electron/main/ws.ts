@@ -40,24 +40,11 @@ const connectScrcpyServer = async (device, ws) => {
             }
             setTimeout(() => {
                 // socket连接
-                let connected = false;
-                let gotInfo = false;
                 videoSocket.on('connect', () => {
                     console.log('scrcpy连接成功', port)
                 })
                 videoSocket.on('data', (data) => {
                     ws.send(data, { binary: true })
-                    // if (!connected && data.length === 1) {
-                    //     device_info.displaysCount = parseInt(data.toString('hex'), 16)
-                    // } else if (!gotInfo && data.length === 68) {
-                    //     device_info.name = data.slice(0, 64).filter(o => !!o).toString()
-                    //     device_info.width = parseInt(data.slice(64, 66).toString('hex'), 16)
-                    //     device_info.height = parseInt(data.slice(66, 68).toString('hex'), 16)
-                    //     console.log('device_info', device_info)
-                    //     gotInfo = true;
-                    // } else {
-                    //     ws.send(data, { binary: true })
-                    // }
                 })
                 videoSocket.on('error', (error) => {
                     console.log(error)
