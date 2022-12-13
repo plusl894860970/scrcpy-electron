@@ -3,6 +3,7 @@
 import { ref, onMounted, nextTick, reactive, watch } from 'vue'
 import { message as AMessage } from 'ant-design-vue'
 import JMuxer from 'jmuxer'
+import { CheckOutlined } from '@ant-design/icons-vue'
 
 const { ipcRenderer } = require('electron')
 
@@ -103,7 +104,7 @@ onMounted(async () => {
     await getDevices()
 })
 
-const address = ref('192.168.31.224')
+const address = ref('')
 const wirelessConnect = async () => {
     console.log(address.value)
     const { message } = await ipcRenderer.invoke('adb-connect', { host: address.value })
@@ -170,22 +171,24 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
     
 <template>
     <div>
-        <a-card title="设备">
-            <template #extra><a @click="getDevices">刷新</a></template>
-            <a-row>
-                <a-col :span="5">
-                    <a-input-group compact style="margin-bottom: 15px">
-                        <a-input v-model:value="address" style="width: calc(100% - 100px)" />
-                        <a-button type="primary" @click="wirelessConnect">ADB连接
+        <a-card>
+            <template #title>
+                <a-row>
+                    <a-col :span="5">
+                        <a-input-group compact>
+                            <a-input v-model:value="address" style="width: calc(100% - 100px)" placeholder="IP地址" />
+                            <a-button type="primary" @click="wirelessConnect">ADB连接
+                            </a-button>
+                        </a-input-group>
+                    </a-col>
+                    <a-col :span="19">
+                        <a-button type="primary" @click="isShowSelect = true">批量安装/推送
                         </a-button>
-                    </a-input-group>
-                </a-col>
-                <a-col :span="19">
-                    <a-button type="primary" @click="isShowSelect = true">批量安装/推送
-                    </a-button>
-                </a-col>
-            </a-row>
-            <a-alert show-icon message="操作说明" type="info" style="margin-bottom: 15px">
+                    </a-col>
+                </a-row>
+            </template>
+            <template #extra><a @click="getDevices">刷新列表</a></template>
+            <a-alert show-icon message="操作说明" type="info" style="margin-bottom: 15px" closable>
                 <template #description>
                     <div>
                         点击返回键 <a-tag>Alt + B</a-tag>,
@@ -194,37 +197,43 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
                 </template>
             </a-alert>
         </a-card>
-        <div style="display: grid; grid-template-columns: 22.5vw 22.5vw 22.5vw 22.5vw">
-            <a-card v-for="record in devices" style="width: 20vmax; margin: 10px">
+        <div style="display: grid; grid-template-columns: 16.6vw 16.6vw 16.6vw 16.6vw 16.6vw 16.6vw">
+            <a-card v-for="record in devices" style="width: 15vmax; margin: 10px">
+                <a-input-group compact style="margin: 0 auto 5px auto">
+                    <a-input v-model:value="record.remark" size="small" style="width: calc(100% - 25px)"
+                        @change="record.remark_modify = true" :placeholder="record.host" />
+                    <a-button type="primary" size="small" @click="setRemark(record)"
+                        :disabled="!record.remark_modify">
+                        <template #icon><CheckOutlined /></template>
+                    </a-button>
+                </a-input-group>
+                <!-- <div style="font-size: 12px; font-weight: 800">{{ record.host }}</div> -->
                 <video :id="`player_${record.host}`" autoplay style="width: 100%"></video>
                 <a-empty v-if="record.signal_connecting" description="信号连接中"></a-empty>
                 <a-empty v-if="!record.display" description="信号断开"></a-empty>
-                <div style="margin: 15px auto; text-align: center">{{ record.host }}</div>
                 <a-form>
-                    <a-form-item label="备注">
-                        <a-input-group compact>
-                            <a-input v-model:value="record.remark" style="width: calc(100% - 100px)"
-                                @change="record.remark_modify = true" />
-                            <a-button type="primary" @click="setRemark(record)" :disabled="!record.remark_modify">保存
-                            </a-button>
-                        </a-input-group>
-                    </a-form-item>
-                    <a-form-item label="预览">
-                        <a-button size="mini" @click="switchDisplay(record)">{{
-                        record.display ? '断开' : '连接' }}</a-button>
-                    </a-form-item>
-                    <a-form-item label="控制">
-                        <a-button type="primary" size="mini" @click="connect(record)"
-                            :disabled="deviceStatus[record.host]">{{
-                            deviceStatus[record.host] ? '已连接' : '连接' }}</a-button>
+                    <a-form-item :colon="false" label="">
+                        <a-row>
+                            <a-col :span="12">
+                                <a-button style="width: 95%" size="small" :type="record.display ? 'danger' : 'primary'"
+                                    @click="switchDisplay(record)">{{
+                                            record.display ? '断开画面' : '连接画面'
+                                    }}</a-button>
+                            </a-col>
+                            <a-col :span="12">
+                                <a-button style="width: 95%" size="small" type="primary" @click="connect(record)"
+                                    :disabled="deviceStatus[record.host]">{{
+                                            deviceStatus[record.host] ? '控制中' : '连接控制'
+                                    }}</a-button>
+                            </a-col>
+                        </a-row>
                     </a-form-item>
                 </a-form>
             </a-card>
         </div>
         <a-modal v-model:visible="isShowSelect" title="设备列表" :footer="false">
             <div>
-                <a-upload-dragger v-model:fileList="fileList" name="file" action="#"
-                    :customRequest="handleChange">
+                <a-upload-dragger v-model:fileList="fileList" name="file" action="#" :customRequest="handleChange">
                     <p class="ant-upload-text">点击或者拖拽文件到此处</p>
                     <p class="ant-upload-hint">
                         APK文件会安装、其他会推送到设备上
@@ -241,9 +250,11 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
             <a-divider />
             <a-checkbox-group v-model:value="state.checkedList" :options="state.plainOptions" />
             <div style="margin-top: 35px" v-if="fileList[0]">
-                <div style="margin-bottom: 15px" v-if="!fileList[0].name.endsWith('.apk')">推送路径：<a-input v-model:value="targetDir" /></div>
+                <div style="margin-bottom: 15px" v-if="!fileList[0].name.endsWith('.apk')">推送路径：<a-input
+                        v-model:value="targetDir" /></div>
                 <a-button type="primary" @click="confirmInstall" :loading="installLoading"
-                    :disabled="!state.checkedList.length || !apk">{{ fileList[0].name.endsWith('.apk') ? '安装' : '推送' }}</a-button>
+                    :disabled="!state.checkedList.length || !apk">{{ fileList[0].name.endsWith('.apk') ? '安装' : '推送'
+                    }}</a-button>
             </div>
             <a-divider />
             <div v-for="item in installMsg">{{ item.host }}: {{ item.msg }}</div>
@@ -251,3 +262,12 @@ ipcRenderer.on('install-msg', (e: any, data: any) => {
     </div>
 </template>
     
+<style>
+.ant-card-body {
+    padding: 5px !important;
+}
+
+.ant-form-item {
+    margin-bottom: 5px !important;
+}
+</style>

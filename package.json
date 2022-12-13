@@ -1,6 +1,6 @@
 {
   "name": "scrcpy-electron",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "dist-electron/main/index.js",
   "description": "Scrcpy GUI.",
   "author": "HappyPlus <48100247@qq.com>",
@@ -38,6 +38,7 @@
     "vue"
   ],
   "dependencies": {
+    "@ant-design/icons-vue": "^6.1.0",
     "ant-design-vue": "^3.2.12",
     "jmuxer": "^2.0.5",
     "vue-router": "4",
